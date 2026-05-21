@@ -162,4 +162,42 @@ extern "C" void JNICALL Java_com_dishii_soh_MainActivity_detachController(JNIEnv
     isUsingTouchscreenControls = false;
 }
 
+// ---------------------------------------------------------------------------
+// CVar bridge — used by SettingsActivity to read/write CVars while the game
+// is running. All calls are safe on the UI thread: CVarGet/Set are guarded
+// internally by a mutex in libultraship.
+// ---------------------------------------------------------------------------
+
+extern "C" jboolean JNICALL Java_com_dishii_soh_NativeSettingsBridge_isEngineInitialized(JNIEnv*, jobject) {
+    return Ship::Context::GetInstance() != nullptr ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" jint JNICALL Java_com_dishii_soh_NativeSettingsBridge_getCVarInt(JNIEnv* env, jobject, jstring jname) {
+    const char* name = env->GetStringUTFChars(jname, nullptr);
+    jint value = CVarGetInteger(name, 0);
+    env->ReleaseStringUTFChars(jname, name);
+    return value;
+}
+
+extern "C" void JNICALL Java_com_dishii_soh_NativeSettingsBridge_setCVarInt(JNIEnv* env, jobject, jstring jname, jint value) {
+    const char* name = env->GetStringUTFChars(jname, nullptr);
+    CVarSetInteger(name, value);
+    CVarSave();
+    env->ReleaseStringUTFChars(jname, name);
+}
+
+extern "C" jfloat JNICALL Java_com_dishii_soh_NativeSettingsBridge_getCVarFloat(JNIEnv* env, jobject, jstring jname) {
+    const char* name = env->GetStringUTFChars(jname, nullptr);
+    jfloat value = CVarGetFloat(name, 0.0f);
+    env->ReleaseStringUTFChars(jname, name);
+    return value;
+}
+
+extern "C" void JNICALL Java_com_dishii_soh_NativeSettingsBridge_setCVarFloat(JNIEnv* env, jobject, jstring jname, jfloat value) {
+    const char* name = env->GetStringUTFChars(jname, nullptr);
+    CVarSetFloat(name, value);
+    CVarSave();
+    env->ReleaseStringUTFChars(jname, name);
+}
+
 #endif
