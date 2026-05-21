@@ -91,4 +91,25 @@ bool ControllerGyro::HasMappingForPhysicalDeviceType(PhysicalDeviceType physical
 
     return mGyroMapping->GetPhysicalDeviceType() == physicalDeviceType;
 }
+
+#ifdef __ANDROID__
+bool ControllerGyro::HasAndroidDeviceGyro() {
+    return GyroMappingFactory::HasAndroidDeviceGyro();
+}
+
+bool ControllerGyro::SetAndroidDeviceGyroMapping() {
+    auto mapping = GyroMappingFactory::CreateAndroidDeviceGyroMapping(mPortIndex);
+    if (mapping == nullptr) {
+        return false;
+    }
+    SetGyroMapping(mapping);
+    mapping->SaveToConfig();
+    SaveGyroMappingIdToConfig();
+    const std::string hasConfigCvarKey =
+        StringHelper::Sprintf(CVAR_PREFIX_CONTROLLERS ".Port%d.HasConfig", mPortIndex + 1);
+    CVarSetInteger(hasConfigCvarKey.c_str(), true);
+    CVarSave();
+    return true;
+}
+#endif
 } // namespace Ship

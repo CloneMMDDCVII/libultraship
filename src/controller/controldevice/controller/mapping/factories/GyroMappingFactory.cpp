@@ -78,4 +78,24 @@ std::shared_ptr<ControllerGyroMapping> GyroMappingFactory::CreateGyroMappingFrom
 
     return mapping;
 }
+
+#ifdef __ANDROID__
+bool GyroMappingFactory::HasAndroidDeviceGyro() {
+    for (int i = 0; i < SDL_NumSensors(); i++) {
+        if (SDL_SensorGetDeviceType(i) == SDL_SENSOR_GYRO) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::shared_ptr<ControllerGyroMapping> GyroMappingFactory::CreateAndroidDeviceGyroMapping(uint8_t portIndex) {
+    if (!HasAndroidDeviceGyro()) {
+        return nullptr;
+    }
+    auto mapping = std::make_shared<SDLGyroMapping>(portIndex, 1.0f, 0.0f, 0.0f, 0.0f);
+    mapping->Recalibrate();
+    return mapping;
+}
+#endif
 } // namespace Ship

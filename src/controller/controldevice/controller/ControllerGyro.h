@@ -23,6 +23,11 @@ class ControllerGyro {
 
     bool HasMappingForPhysicalDeviceType(PhysicalDeviceType physicalDeviceType);
 
+#ifdef __ANDROID__
+    bool HasAndroidDeviceGyro();
+    bool SetAndroidDeviceGyroMapping();
+#endif
+
   private:
     uint8_t mPortIndex;
     std::shared_ptr<ControllerGyroMapping> mGyroMapping;
